@@ -1,0 +1,12 @@
+# Compiled sources #
+####################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
+####################
+.idea
+venv
