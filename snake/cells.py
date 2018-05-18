@@ -52,8 +52,9 @@ class ElasticWallCell(Cell):
     color = 'purple'
 
     def on_bump(self, game):
-        game.snake.need_reverse = True
-        game.turn(game.snake.direction)
+        game.snake.len += 1
+        game.turn(game.snake.OPPOSITE[game.snake.direction])
+        game.snake.len -= 1
 
 class TeleportWallCell(Cell):
     color = 'blue'

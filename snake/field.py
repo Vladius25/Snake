@@ -36,7 +36,7 @@ class Field:
         for y in range(self.height):
             for x in range(self.width):
                 cell = self._cells[y][x]
-                if game.snake.need_reverse == True and type(self._cells[y][x]) == SnakeCell and self._cells[y][x].time_to_live == 1:
+                if game.snake.need_reverse == True and type(self._cells[y][x]) == SnakeCell and self._cells[y][x].time_to_live == 1: 
                     game.snake.head = y, x
                     
                 if cell is not None:

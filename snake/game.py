@@ -32,11 +32,16 @@ class SnakeState:
         dy, dx = self.TURNS[self.direction]
         return self.head[0] + dy, self.head[1] + dx
 
+    def get_side(self, y, x):
+        for direction, pos in self.TURNS.items():
+             if pos == (y, x):
+                return direction
+
 
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1,2), 10, 'right')
+        self.snake = SnakeState((1,2), 4, 'right')
 
         self.is_paused = True
         self.is_dead = False
@@ -69,12 +74,18 @@ class Game:
         if self.snake.direction == self.snake.OPPOSITE[side]:
             self.snake.need_reverse = True
             self.field.update(game=self)
+            dx = (1, -1, 0, 0)
+            dy = (0, 0, 1, -1)
+            y, x = self.snake.head
+            for i in range(4):
+                if type(self.field.get_cell(y + dy[i], x + dx[i])) == SnakeCell:
+                    side = self.snake.get_side(-dy[i], -dx[i])
+                    break
+            self.snake.need_reverse = False
 
         self.snake.turn(side)
 
     def update(self):
-        self.snake.need_reverse = False
-
         if self.is_paused or self.is_dead:
             return
 
