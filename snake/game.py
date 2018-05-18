@@ -21,7 +21,7 @@ class SnakeState:
         self.head = head_position
         self.len = start_length
         self.direction = direction
-        self.need_reverse = need_reverse
+        self.need_reverse = False
 
     def turn(self, direction):
         if direction not in self.TURNS.keys():
@@ -63,7 +63,7 @@ class Game:
         self.field.set_cell(y, x, FoodCell())
 
     def pause(self):
-        self.is_paused = not self.is_paused
+        self.is_paused = not self.is_paused 
 
     def turn(self, side):
         if self.snake.direction == self.snake.OPPOSITE[side]:

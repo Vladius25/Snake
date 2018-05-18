@@ -44,7 +44,7 @@ class FoodCell(Cell):
 
 class DeathWallCell(Cell):
     color = 'grey'
-
+    
     def on_bump(self, game):
         game.is_dead = True
 
