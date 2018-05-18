@@ -15,6 +15,9 @@ class SnakeCell(Cell):
         self.time_to_live = time_to_live
 
     def update(self, game):
+        if game.snake.need_reverse:
+            self.time_to_live = game.snake.len - self.time_to_live + 2
+
         if self.time_to_live == 1:
             return None
         return SnakeCell(self.time_to_live - 1)
@@ -44,3 +47,25 @@ class DeathWallCell(Cell):
 
     def on_bump(self, game):
         game.is_dead = True
+
+class ElasticWallCell(Cell):
+    color = 'purple'
+
+    def on_bump(self, game):
+        game.snake.need_reverse = True
+        game.turn(game.snake.direction)
+
+class TeleportWallCell(Cell):
+    color = 'blue'
+
+    def on_bump(self, game):
+        if(game.snake.head[1] == 0):
+            game.snake.head = (game.snake.head[0], game.field.width - 2) 
+            game.turn('left')
+        else:
+            game.snake.head = (game.snake.head[0], 1) 
+            game.turn('right')
+        
+
+
+        

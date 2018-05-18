@@ -1,5 +1,5 @@
 from .field import Field
-from .cells import SnakeCell, FoodCell, DeathWallCell
+from .cells import SnakeCell, FoodCell, DeathWallCell, ElasticWallCell, TeleportWallCell
 
 
 class SnakeState:
@@ -10,10 +10,18 @@ class SnakeState:
         'right': (0, 1),
     }
 
-    def __init__(self, head_position, start_length, direction):
+    OPPOSITE = {
+        'up': 'down',
+        'down': 'up',
+        'left': 'right',
+        'right': 'left',
+    }
+
+    def __init__(self, head_position, start_length, direction, need_reverse = False):
         self.head = head_position
         self.len = start_length
         self.direction = direction
+        self.need_reverse = need_reverse
 
     def turn(self, direction):
         if direction not in self.TURNS.keys():
@@ -28,7 +36,7 @@ class SnakeState:
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1,2), 2, 'right')
+        self.snake = SnakeState((1,2), 10, 'right')
 
         self.is_paused = True
         self.is_dead = False
@@ -41,12 +49,12 @@ class Game:
         self.field.set_cell(1, 2, SnakeCell(time_to_live=2))
 
         for x in range(self.field.width):
-            self.field.set_cell(0, x, DeathWallCell())
+            self.field.set_cell(0, x, ElasticWallCell())
             self.field.set_cell(self.field.width - 1, x, DeathWallCell())
 
         for y in range(self.field.height):
-            self.field.set_cell(y, 0, DeathWallCell())
-            self.field.set_cell(y, self.field.height - 1, DeathWallCell())
+            self.field.set_cell(y, 0, TeleportWallCell())
+            self.field.set_cell(y, self.field.height - 1, TeleportWallCell())
 
         self.spawn_food()
 
@@ -58,9 +66,15 @@ class Game:
         self.is_paused = not self.is_paused
 
     def turn(self, side):
+        if self.snake.direction == self.snake.OPPOSITE[side]:
+            self.snake.need_reverse = True
+            self.field.update(game=self)
+
         self.snake.turn(side)
 
     def update(self):
+        self.snake.need_reverse = False
+
         if self.is_paused or self.is_dead:
             return
 
