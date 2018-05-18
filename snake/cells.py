@@ -20,6 +20,7 @@ class SnakeCell(Cell):
 
         if self.time_to_live == 1:
             return None
+
         return SnakeCell(self.time_to_live - 1)
 
     def on_bump(self, game):
@@ -41,6 +42,35 @@ class FoodCell(Cell):
     def update(self, game):
         return None if self.is_eaten else self
 
+class DeathFoodCell(FoodCell):
+    color = 'red'
+
+    def __init__(self, time_to_live = 50):
+        self.time_to_live = time_to_live
+
+    def on_bump(self, game):
+        game.is_dead = True
+        game.field.set_cell(*game.deathfood, None) 
+
+    def update(self, game):
+        if self.time_to_live == 0:
+            game.spawn_deathfood()
+            return None
+        return DeathFoodCell(self.time_to_live - 1)
+
+
+class PoisonFoodCell(FoodCell):
+    color = 'brown'
+
+    def on_bump(self, game):
+        self.is_eaten = True
+        game.snake.len -= 1
+        if game.snake.len == 0:
+            game.is_dead = True
+            game.is_eaten = True
+            game.field.update(game)
+        else:
+            game.spawn_poisonfood()
 
 class DeathWallCell(Cell):
     color = 'grey'

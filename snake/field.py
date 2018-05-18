@@ -38,6 +38,5 @@ class Field:
                 cell = self._cells[y][x]
                 if game.snake.need_reverse == True and type(self._cells[y][x]) == SnakeCell and self._cells[y][x].time_to_live == 1: 
                     game.snake.head = y, x
-                    
                 if cell is not None:
                     self._cells[y][x] = cell.update(game)

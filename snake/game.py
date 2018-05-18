@@ -1,5 +1,5 @@
 from .field import Field
-from .cells import SnakeCell, FoodCell, DeathWallCell, ElasticWallCell, TeleportWallCell
+from .cells import SnakeCell, FoodCell, DeathWallCell, ElasticWallCell, TeleportWallCell, PoisonFoodCell, DeathFoodCell
 
 
 class SnakeState:
@@ -41,7 +41,7 @@ class SnakeState:
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1,2), 4, 'right')
+        self.snake = SnakeState((1,2), 12, 'right')
 
         self.is_paused = True
         self.is_dead = False
@@ -52,6 +52,7 @@ class Game:
     def init_level(self):
         self.field.set_cell(1, 1, SnakeCell(time_to_live=1))
         self.field.set_cell(1, 2, SnakeCell(time_to_live=2))
+        self.field.get_cell(1, 2).color = 'turquoise'
 
         for x in range(self.field.width):
             self.field.set_cell(0, x, ElasticWallCell())
@@ -62,10 +63,21 @@ class Game:
             self.field.set_cell(y, self.field.height - 1, TeleportWallCell())
 
         self.spawn_food()
+        self.spawn_poisonfood()
+        self.spawn_deathfood()
 
     def spawn_food(self):
         y, x = self.field.get_random_empty_cell()
         self.field.set_cell(y, x, FoodCell())
+
+    def spawn_poisonfood(self):
+        y, x = self.field.get_random_empty_cell()
+        self.field.set_cell(y, x, PoisonFoodCell())
+
+    def spawn_deathfood(self):
+        y, x = self.field.get_random_empty_cell()
+        self.deathfood = y, x
+        self.field.set_cell(y, x, DeathFoodCell())
 
     def pause(self):
         self.is_paused = not self.is_paused 
@@ -103,6 +115,7 @@ class Game:
         self.field.update(game=self)
 
         self.field.set_cell(*self.snake.head, SnakeCell(time_to_live=self.snake.len))
+        self.field.get_cell(*self.snake.head).color = 'turquoise'
 
     def try_move_head(self):
         new_y, new_x = self.snake.get_next_position()
