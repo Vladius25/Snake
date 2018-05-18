@@ -52,6 +52,12 @@ class Board(QFrame):
             self.game.turn('down')
         elif key == Qt.Key_Up:
             self.game.turn('up')
+        elif key == Qt.Key_Plus or key == Qt.Key_Equal:
+            self.UPDATE_INTERVAL -= 10
+            self.timer.start(self.UPDATE_INTERVAL, self)
+        elif key == Qt.Key_Minus or key == Qt.Key_hyphen:
+            self.UPDATE_INTERVAL += 10
+            self.timer.start(self.UPDATE_INTERVAL, self)
         else:
             super().keyPressEvent(event)
 

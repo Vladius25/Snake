@@ -41,7 +41,7 @@ class SnakeState:
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1,2), 12, 'right')
+        self.snake = SnakeState((1,2), 2, 'right')
 
         self.is_paused = True
         self.is_dead = False
