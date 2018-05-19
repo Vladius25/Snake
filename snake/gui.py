@@ -58,13 +58,16 @@ class Board(QFrame):
         elif key == Qt.Key_Minus or key == Qt.Key_hyphen:
             self.UPDATE_INTERVAL += 10
             self.timer.start(self.UPDATE_INTERVAL, self)
+        elif key == Qt.Key_R:
+            self.game.restart(30, 30)
         else:
             super().keyPressEvent(event)
 
     def update_status(self):
-        status = 'Score: {0}'.format(self.game.score)
+        data = ' | +/- to change speed | R to restart game'
+        status = 'Score: {0}{1}'.format(self.game.score, data)
         if self.game.is_paused:
-            status = 'PAUSED'
+            status = 'PAUSED' + data
         elif self.game.is_dead:
             status = 'GAME OVER. ' + status
         self.statusUpdated.emit(status)

@@ -80,7 +80,10 @@ class Game:
         self.field.set_cell(y, x, DeathFoodCell())
 
     def pause(self):
-        self.is_paused = not self.is_paused 
+        self.is_paused = not self.is_paused
+
+    def restart(self, width = 30, height = 30):
+        self.__init__(width, height)
 
     def turn(self, side):
         if self.snake.direction == self.snake.OPPOSITE[side]:
