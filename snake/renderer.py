@@ -10,6 +10,9 @@ class Renderer:
         'purple'    : 0xCC66CC,
         'turquoise' : 0x66CCCC,
         'yellow'    : 0xDAAA00,
+        'pink'      : 0xFF33CC,
+        'dark_green': 0x006633,
+        'indigo'    : 0x000066,
     }
 
     def __init__(self, painter):

@@ -15,7 +15,7 @@ class Bfs:
 		try:
 			return path[-2]
 		except IndexError:
-			return (x1 + 1, y1)
+			return None
 
 	def search(self, N, M, start, finish, cells):
 	    used, queue = [[False] * N for i in range(M)], [start]
@@ -36,6 +36,8 @@ class Bfs:
 
 	def bfs_paths(self, start, finish, p):
 	 	x, y = finish.x, finish.y
+	 	if p[x][y] is None:
+	 		return []
 	 	path = [(x, y)]
 	 	while (x != start.x) or (y != start.y):
 	 		v = p[x][y]
