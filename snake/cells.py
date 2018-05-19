@@ -4,7 +4,7 @@ class Cell:
     def update(self, game):
         return self
 
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         pass
 
 
@@ -23,7 +23,7 @@ class SnakeCell(Cell):
 
         return SnakeCell(self.time_to_live - 1)
 
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         game.is_dead = True
 
 
@@ -33,9 +33,9 @@ class FoodCell(Cell):
     def __init__(self):
         self.is_eaten = False
 
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         self.is_eaten = True
-        game.snake.len += 1
+        snake.len += 1
         game.score += 1
         game.spawn_food()
 
@@ -48,7 +48,7 @@ class DeathFoodCell(FoodCell):
     def __init__(self, time_to_live = 50):
         self.time_to_live = time_to_live
 
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         game.is_dead = True
         game.field.set_cell(*game.deathfood, None) 
 
@@ -62,10 +62,10 @@ class DeathFoodCell(FoodCell):
 class PoisonFoodCell(FoodCell):
     color = 'brown'
 
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         self.is_eaten = True
-        game.snake.len -= 1
-        if game.snake.len == 0:
+        snake.len -= 1
+        if snake.len == 0:
             game.is_dead = True
             game.is_eaten = True
             game.field.update(game)
@@ -75,26 +75,26 @@ class PoisonFoodCell(FoodCell):
 class DeathWallCell(Cell):
     color = 'grey'
     
-    def on_bump(self, game):
+    def on_bump(self, game, snake):
         game.is_dead = True
 
 class ElasticWallCell(Cell):
     color = 'purple'
 
-    def on_bump(self, game):
-        game.snake.len += 1
-        game.turn(game.snake.OPPOSITE[game.snake.direction])
-        game.snake.len -= 1
+    def on_bump(self, game, snake):
+        snake.len += 1
+        game.turn(snake.OPPOSITE[snake.direction])
+        snake.len -= 1
 
 class TeleportWallCell(Cell):
     color = 'blue'
 
-    def on_bump(self, game):
-        if(game.snake.head[1] == 0):
-            game.snake.head = (game.snake.head[0], game.field.width - 2) 
+    def on_bump(self, game, snake):
+        if(snake.head[1] == 0):
+            snake.head = (snake.head[0], game.field.width - 2) 
             game.turn('left')
         else:
-            game.snake.head = (game.snake.head[0], 1) 
+            snake.head = (snake.head[0], 1) 
             game.turn('right')
         
 

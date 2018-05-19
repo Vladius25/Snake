@@ -32,6 +32,9 @@ class Field:
             raise ValueError('Cell ({0}, {1}) is outside of field'.format(y, x))
         return self._cells[y][x]
 
+    def get_field(self):
+        return self._cells
+
     def update(self, game):
         for y in range(self.height):
             for x in range(self.width):

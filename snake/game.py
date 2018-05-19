@@ -1,6 +1,6 @@
 from .field import Field
 from .cells import SnakeCell, FoodCell, DeathWallCell, ElasticWallCell, TeleportWallCell, PoisonFoodCell, DeathFoodCell
-
+from .bfs import Bfs
 
 class SnakeState:
     TURNS = {
@@ -17,7 +17,9 @@ class SnakeState:
         'right': 'left',
     }
 
-    def __init__(self, head_position, start_length, direction, need_reverse = False):
+    snake_cells = ()
+
+    def __init__(self, head_position, start_length, direction):
         self.head = head_position
         self.len = start_length
         self.direction = direction
@@ -37,15 +39,25 @@ class SnakeState:
              if pos == (y, x):
                 return direction
 
+class AngryState(SnakeState):
+
+    def get_next_position(self, y, x, cells):
+        bfs = Bfs()
+        return bfs.get_next(*self.head, y, x, cells)
+
 
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1,2), 2, 'right')
+        self.snake = SnakeState((1, 2), 2, 'right')
+        self.angry = AngryState((height - 2, width - 2), 12, "left")
 
         self.is_paused = True
         self.is_dead = False
         self.score = 0
+
+        self.width = width
+        self.height = height
 
         self.init_level()
 
@@ -53,6 +65,10 @@ class Game:
         self.field.set_cell(1, 1, SnakeCell(time_to_live=1))
         self.field.set_cell(1, 2, SnakeCell(time_to_live=2))
         self.field.get_cell(1, 2).color = 'turquoise'
+
+        self.field.set_cell(self.height - 2, self.width - 3, SnakeCell(time_to_live=1))
+        self.field.set_cell(self.height - 2, self.width - 2, SnakeCell(time_to_live=2))
+        self.field.get_cell(self.height - 2, self.width - 3).color = 'blue'
 
         for x in range(self.field.width):
             self.field.set_cell(0, x, ElasticWallCell())
@@ -68,6 +84,7 @@ class Game:
 
     def spawn_food(self):
         y, x = self.field.get_random_empty_cell()
+        self.food = y, x
         self.field.set_cell(y, x, FoodCell())
 
     def spawn_poisonfood(self):
@@ -83,6 +100,7 @@ class Game:
         self.is_paused = not self.is_paused
 
     def restart(self, width = 30, height = 30):
+        self.is_paused = False
         self.__init__(width, height)
 
     def turn(self, side):
@@ -108,9 +126,10 @@ class Game:
             self.is_dead = True
             return
 
-        cell = self.field.get_cell(*self.snake.head)
-        if cell is not None:
-            cell.on_bump(self)
+        for snake in (self.snake, self.angry):
+            cell = self.field.get_cell(*snake.head)
+            if cell is not None:
+                cell.on_bump(self, snake)
 
         if self.is_dead:
             return
@@ -120,10 +139,15 @@ class Game:
         self.field.set_cell(*self.snake.head, SnakeCell(time_to_live=self.snake.len))
         self.field.get_cell(*self.snake.head).color = 'turquoise'
 
+        self.field.set_cell(*self.angry.head, SnakeCell(time_to_live=self.angry.len))
+        self.field.get_cell(*self.angry.head).color = 'blue'
+
     def try_move_head(self):
         new_y, new_x = self.snake.get_next_position()
+        new_angry_y, new_angry_x = self.angry.get_next_position(*self.food, self.field.get_field())
 
         if self.field.contains_cell(new_y, new_x):
             self.snake.head = new_y, new_x
+            self.angry.head = new_angry_y, new_angry_x
             return True
         return False
