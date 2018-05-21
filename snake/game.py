@@ -17,13 +17,13 @@ class SnakeState:
         'right': 'left',
     }
 
-    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'turquoise'):
+    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'turquoise', cell_type = SnakeCell):
         self.head = head_position
         self.len = start_length
         self.direction = direction
         self.need_reverse = False
         self.score = score
-        self.cell_type = SnakeCell
+        self.cell_type = cell_type
         self.head_color = head_color
 
     def turn(self, direction):
@@ -40,23 +40,11 @@ class SnakeState:
              if pos == (y, x):
                 return direction
 
-class AngryState(SnakeState):
-
-    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'indigo'):
-        super().__init__(head_position, start_length, direction, score)
-        self.cell_type = AngrySnakeCell
-        self.head_color = head_color
-
-    def get_next_position(self, y, x, field):
-        bfs = Bfs()
-        return bfs.get_next(*self.head, y, x, field)
-
-
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
-        self.snake = SnakeState((1, 2), 2, 'right')
-        self.angry = AngryState((height - 2, width - 3), 2, "left")
+        self.snake = SnakeState((1, 2), 2, 'right', 0, 'turquoise', SnakeCell)
+        self.angry = SnakeState((height - 2, width - 3), 2, "left", 0, 'indigo', AngrySnakeCell)
 
         self.is_paused = True
         self.is_dead = False
@@ -124,9 +112,16 @@ class Game:
 
         self.snake.turn(side)
 
+    def turn_angry(self):
+        bfs = Bfs(self.width, self.height, self.field)
+        y, x = bfs.get_next(*self.angry.head, *self.food)
+        self.angry.direction = self.angry.get_side(y, x)
+
     def update(self):
         if self.is_paused or self.is_dead:
             return
+
+        self.turn_angry()
 
         if not self.try_move_head():
             self.is_dead = True
@@ -142,15 +137,17 @@ class Game:
 
         self.field.update(game=self)
 
-        self.field.set_cell(*self.snake.head, SnakeCell(time_to_live=self.snake.len))
-        self.field.get_cell(*self.snake.head).color = self.snake.head_color
+        for snake in [self.snake, self.angry]:
+            self.field.set_cell(*snake.head, snake.cell_type(time_to_live=snake.len))
+            self.field.get_cell(*snake.head).color = snake.head_color
 
-        self.field.set_cell(*self.angry.head, AngrySnakeCell(time_to_live=self.angry.len))
-        self.field.get_cell(*self.angry.head).color = self.angry.head_color
+        if self.snake.head == self.angry.head:
+            self.is_dead = True
+            return
 
     def try_move_head(self):
         new_y, new_x = self.snake.get_next_position()
-        new_angry_y, new_angry_x = self.angry.get_next_position(*self.food, self.field)
+        new_angry_y, new_angry_x = self.angry.get_next_position()
 
         if self.field.contains_cell(new_y, new_x):
             self.snake.head = new_y, new_x

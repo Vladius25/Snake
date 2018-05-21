@@ -7,7 +7,6 @@ class Cell:
     def on_bump(self, game, snake):
         pass
 
-
 class SnakeCell(Cell):
     color = 'green'
 
