@@ -32,14 +32,11 @@ class Field:
             raise ValueError('Cell ({0}, {1}) is outside of field'.format(y, x))
         return self._cells[y][x]
 
-    def get_field(self):
-        return self._cells
-
     def update(self, game):
         for y in range(self.height):
             for x in range(self.width):
                 cell = self._cells[y][x]
-                if game.snake.need_reverse == True and type(self._cells[y][x]) == SnakeCell and self._cells[y][x].time_to_live == 1: 
+                if game.snake.need_reverse and type(self._cells[y][x]) == SnakeCell and self._cells[y][x].time_to_live == 1: 
                     game.snake.head = y, x
                 if cell is not None:
                     self._cells[y][x] = cell.update(game)

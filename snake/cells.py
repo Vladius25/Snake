@@ -30,6 +30,9 @@ class AngrySnakeCell(SnakeCell):
     color = 'dark_green'
 
     def update(self, game):
+        if game.snake.need_reverse:
+            self.time_to_live += 1
+
         if self.time_to_live == 1:
             return None
 
@@ -45,7 +48,7 @@ class FoodCell(Cell):
     def on_bump(self, game, snake):
         self.is_eaten = True
         snake.len += 1
-        game.score += 1
+        snake.score += 1
         game.spawn_food()
 
     def update(self, game):

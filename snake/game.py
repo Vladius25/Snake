@@ -17,13 +17,14 @@ class SnakeState:
         'right': 'left',
     }
 
-    snake_cells = ()
-
-    def __init__(self, head_position, start_length, direction):
+    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'turquoise'):
         self.head = head_position
         self.len = start_length
         self.direction = direction
         self.need_reverse = False
+        self.score = score
+        self.cell_type = SnakeCell
+        self.head_color = head_color
 
     def turn(self, direction):
         if direction not in self.TURNS.keys():
@@ -41,20 +42,24 @@ class SnakeState:
 
 class AngryState(SnakeState):
 
-    def get_next_position(self, y, x, cells):
+    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'indigo'):
+        super().__init__(head_position, start_length, direction, score)
+        self.cell_type = AngrySnakeCell
+        self.head_color = head_color
+
+    def get_next_position(self, y, x, field):
         bfs = Bfs()
-        return bfs.get_next(*self.head, y, x, cells)
+        return bfs.get_next(*self.head, y, x, field)
 
 
 class Game:
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
         self.snake = SnakeState((1, 2), 2, 'right')
-        self.angry = AngryState((height - 2, width - 2), 2, "left")
+        self.angry = AngryState((height - 2, width - 3), 2, "left")
 
         self.is_paused = True
         self.is_dead = False
-        self.score = 0
 
         self.width = width
         self.height = height
@@ -62,13 +67,8 @@ class Game:
         self.init_level()
 
     def init_level(self):
-        self.field.set_cell(1, 1, SnakeCell(time_to_live=1))
-        self.field.set_cell(1, 2, SnakeCell(time_to_live=2))
-        self.field.get_cell(1, 2).color = 'turquoise'
-
-        self.field.set_cell(self.height - 2, self.width - 3, AngrySnakeCell(time_to_live=1))
-        self.field.set_cell(self.height - 2, self.width - 2, AngrySnakeCell(time_to_live=2))
-        self.field.get_cell(self.height - 2, self.width - 3).color = 'indigo'
+        self.init_snake(self.snake)
+        self.init_snake(self.angry)
 
         for x in range(self.field.width):
             self.field.set_cell(0, x, ElasticWallCell())
@@ -81,6 +81,12 @@ class Game:
         self.spawn_food()
         self.spawn_poisonfood()
         self.spawn_deathfood()
+
+    def init_snake(self, snake):
+            dx = snake.TURNS[snake.direction][1]
+            self.field.set_cell(*snake.head, snake.cell_type(time_to_live = snake.len))
+            self.field.set_cell(snake.head[0], snake.head[1] - dx, snake.cell_type(time_to_live = snake.len - 1))
+            self.field.get_cell(*snake.head).color = snake.head_color
 
     def spawn_food(self):
         y, x = self.field.get_random_empty_cell()
@@ -126,7 +132,7 @@ class Game:
             self.is_dead = True
             return
 
-        for snake in (self.snake, self.angry):
+        for snake in [self.snake, self.angry]:
             cell = self.field.get_cell(*snake.head)
             if cell is not None:
                 cell.on_bump(self, snake)
@@ -137,17 +143,14 @@ class Game:
         self.field.update(game=self)
 
         self.field.set_cell(*self.snake.head, SnakeCell(time_to_live=self.snake.len))
-        self.field.get_cell(*self.snake.head).color = 'turquoise'
+        self.field.get_cell(*self.snake.head).color = self.snake.head_color
 
         self.field.set_cell(*self.angry.head, AngrySnakeCell(time_to_live=self.angry.len))
-        self.field.get_cell(*self.angry.head).color = 'indigo'
+        self.field.get_cell(*self.angry.head).color = self.angry.head_color
 
     def try_move_head(self):
-        try:
-            new_y, new_x = self.snake.get_next_position()
-            new_angry_y, new_angry_x = self.angry.get_next_position(*self.food, self.field.get_field())
-        except TypeError:
-            return False
+        new_y, new_x = self.snake.get_next_position()
+        new_angry_y, new_angry_x = self.angry.get_next_position(*self.food, self.field)
 
         if self.field.contains_cell(new_y, new_x):
             self.snake.head = new_y, new_x
