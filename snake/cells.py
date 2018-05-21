@@ -61,7 +61,7 @@ class DeathFoodCell(FoodCell):
 
     def on_bump(self, game, snake):
         game.is_dead = True
-        game.field.set_cell(*game.deathfood, None) 
+        game.field.set_cell(*game.death_food, None) 
 
     def update(self, game):
         if self.time_to_live == 0:
@@ -79,7 +79,9 @@ class PoisonFoodCell(FoodCell):
         if snake.len == 0:
             game.is_dead = True
             game.is_eaten = True
-            game.field.update(game)
+            game.field.set_cell(*game.poison_food, None)
+            dy, dx = snake.TURNS[snake.direction]
+            game.field.set_cell(snake.head[0] - dy, snake.head[1] - dx, None)
         else:
             game.spawn_poisonfood()
 

@@ -83,11 +83,12 @@ class Game:
 
     def spawn_poisonfood(self):
         y, x = self.field.get_random_empty_cell()
+        self.poison_food = y, x
         self.field.set_cell(y, x, PoisonFoodCell())
 
     def spawn_deathfood(self):
         y, x = self.field.get_random_empty_cell()
-        self.deathfood = y, x
+        self.death_food = y, x
         self.field.set_cell(y, x, DeathFoodCell())
 
     def pause(self):
