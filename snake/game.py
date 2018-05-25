@@ -2,6 +2,7 @@ from .field import Field
 from .cells import SnakeCell, FoodCell, DeathWallCell, ElasticWallCell, TeleportWallCell, PoisonFoodCell, DeathFoodCell, AngrySnakeCell
 from .bfs import Bfs
 
+
 class SnakeState:
     TURNS = {
         'up':    (-1, 0),
@@ -17,7 +18,7 @@ class SnakeState:
         'right': 'left',
     }
 
-    def __init__(self, head_position, start_length, direction, score = 0, head_color = 'turquoise', cell_type = SnakeCell):
+    def __init__(self, head_position, start_length, direction, score=0, head_color='turquoise', cell_type=SnakeCell):
         self.head = head_position
         self.len = start_length
         self.direction = direction
@@ -37,14 +38,17 @@ class SnakeState:
 
     def get_side(self, y, x):
         for direction, pos in self.TURNS.items():
-             if pos == (y, x):
+            if pos == (y, x):
                 return direction
 
+
 class Game:
+
     def __init__(self, width=20, height=20):
         self.field = Field(width, height)
         self.snake = SnakeState((1, 2), 2, 'right', 0, 'turquoise', SnakeCell)
-        self.angry = SnakeState((height - 2, width - 3), 2, "left", 0, 'indigo', AngrySnakeCell)
+        self.angry = SnakeState((height - 2, width - 3),
+                                2, "left", 0, 'indigo', AngrySnakeCell)
 
         self.is_paused = True
         self.is_dead = False
@@ -71,10 +75,11 @@ class Game:
         self.spawn_deathfood()
 
     def init_snake(self, snake):
-            dx = snake.TURNS[snake.direction][1]
-            self.field.set_cell(*snake.head, snake.cell_type(time_to_live = snake.len))
-            self.field.set_cell(snake.head[0], snake.head[1] - dx, snake.cell_type(time_to_live = snake.len - 1))
-            self.field.get_cell(*snake.head).color = snake.head_color
+        dx = snake.TURNS[snake.direction][1]
+        self.field.set_cell(*snake.head, snake.cell_type(time_to_live=snake.len))
+        self.field.set_cell(snake.head[0], snake.head[
+                            1] - dx, snake.cell_type(time_to_live=snake.len - 1))
+        self.field.get_cell(*snake.head).color = snake.head_color
 
     def spawn_food(self):
         y, x = self.field.get_random_empty_cell()
@@ -94,7 +99,7 @@ class Game:
     def pause(self):
         self.is_paused = not self.is_paused
 
-    def restart(self, width = 30, height = 30):
+    def restart(self, width=30, height=30):
         self.is_paused = False
         self.__init__(width, height)
 

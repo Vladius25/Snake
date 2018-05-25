@@ -40,7 +40,7 @@ class Board(QFrame):
         if key == Qt.Key_Space:
             self.game.pause()
             return
-        elif key == Qt.Key_R:
+        elif key == Qt.Key_R or key == 1050:
             self.game.restart(30, 30)
             return
 
@@ -66,7 +66,8 @@ class Board(QFrame):
 
     def update_status(self):
         data = ' | +/- to change speed | R to restart game'
-        status = 'You: {0} | Enemy: {1}{2}'.format(self.game.snake.score, self.game.angry.score, data)
+        status = 'You: {0} | Enemy: {1}{2}'.format(
+            self.game.snake.score, self.game.angry.score, data)
         if self.game.is_paused:
             status = 'PAUSED' + data
         elif self.game.is_dead:
@@ -99,4 +100,3 @@ class SnakeWindow(QMainWindow):
         size = self.geometry()
         self.move((screen.width() - size.width()) / 2,
                   (screen.height() - size.height()) / 2)
-
